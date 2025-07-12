@@ -2,21 +2,34 @@ import Foundation
 import AVFoundation
 
 
-
+/*
+  so, you have some audio, probably in PCM format and you want to compress it to AAC,
+  maybe so you can send it over a network in handy packets, I gotchu fam.
+  
+  first we will comrpess it using the below, then we need to use the packetizer to split them up
+  and add those fun fun ADST headers on them.
+*/
 
 public class AACCompressor {
+  
+  
+  public enum Error : Swift.Error {
+    case compressorFail( status: AVAudioConverterOutputStatus, error: NSError? )
+    case createFail
+  }
+  
   
   let converter : AVAudioConverter
   let aacfmt    : AACFormat
   
   
-  public init? ( from: AVAudioFormat, to aac: AACFormat ) {
+  public init ( from: AVAudioFormat, to aac: AACFormat ) throws {
     
     guard
       let converter = AVAudioConverter(from: from, to: aac.avformat)
     else {
       print("can't create conveter for formats")
-      return nil
+      throw Error.createFail
     }
     self.aacfmt    = aac
     self.converter = converter
@@ -24,7 +37,7 @@ public class AACCompressor {
   
   
   
-  public func compress ( pcmbuffer: AVAudioPCMBuffer ) -> AVAudioCompressedBuffer {
+  public func compress ( pcmbuffer: AVAudioPCMBuffer ) -> Result<AVAudioCompressedBuffer, Error> {
     
     // set up a buffer, we get 1024 frames of PCM per packet, so, ....
     let compressed = AVAudioCompressedBuffer (
@@ -32,9 +45,6 @@ public class AACCompressor {
       packetCapacity   : (pcmbuffer.frameLength / 1024) + 1,
       maximumPacketSize: converter.maximumOutputPacketSize
     )
-
-//    print(compressed.packetCapacity)
-//    print(converter.maximumOutputPacketSize)
     
     // now we need a block to provide the input, which is our input buffer, so ...
     let block: AVAudioConverterInputBlock = { inNumPackets, outStatus in
@@ -44,12 +54,16 @@ public class AACCompressor {
     
     var error : NSError? = nil
     let status = converter.convert(to: compressed, error: &error, withInputFrom: block)
+    if case .haveData = status {
+        return .success( compressed )
+    }
+    else {
+      return .failure( .compressorFail(status: status, error: error) )
+    }
+
     
-    // how to handle erorr though?
-    print(error)
     
     
-    return compressed
   }
   
 }
