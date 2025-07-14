@@ -22,14 +22,16 @@ public class AACCompressor {
   let converter : AVAudioConverter
   let aacfmt    : AACFormat
   
+  public private(set) var error : Error? = nil
   
-  public init ( from: AVAudioFormat, to aac: AACFormat ) throws {
+  public init? ( from: AVAudioFormat, to aac: AACFormat ) {
     
     guard
       let converter = AVAudioConverter(from: from, to: aac.avformat)
     else {
       print("can't create conveter for formats")
-      throw Error.createFail
+      self.error = .createFail
+      return nil
     }
     self.aacfmt    = aac
     self.converter = converter

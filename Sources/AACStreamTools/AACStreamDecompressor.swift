@@ -47,9 +47,9 @@ public class AACStreamDecompressor {
   
   public var packetHandler : ((Result<AVAudioPCMBuffer,Error>) -> Void)? = nil
   
+  public private(set) var error : Error? = nil
   
-  
-  public init ( to pcmFmt: AVAudioFormat ) throws {
+  public init? ( to pcmFmt: AVAudioFormat ) {
 
     self.pcmFmt = pcmFmt
     
@@ -82,7 +82,8 @@ public class AACStreamDecompressor {
     let status = AudioFileStreamOpen ( ctxt, properties, packets, kAudioFileAAC_ADTSType, &id )
     if status != noErr {
       print("AFS open fail : \(status)")
-      throw Error.afsOpenFail(status)
+      self.error = .afsOpenFail(status)
+      return nil
     }
     
   }
