@@ -31,6 +31,13 @@ import AVFAudio
 
 public class ADTSPacketizer {
   
+  
+  public enum Error : Swift.Error {
+    case packetDescsMissing
+    case createFail          ( OSStatus )
+    case writeFail           ( OSStatus )
+  }
+  
   public class Context {
     var id            : AudioFileID!
     var packet        = Data()
@@ -38,12 +45,12 @@ public class ADTSPacketizer {
     var callCount     = 0
     var descs         : UnsafeMutablePointer<AudioStreamPacketDescription>?
     
-    public var packetHandler : ((Data) -> Void)? = nil
+    public var packetHandler : ((Result<Data, Error>) -> Void)? = nil
   }
   
   public let context = Context()
   
-  public init(aacFmt: AACFormat) {
+  public init? ( aacFmt: AACFormat ) {
     /*
       write callback for AudioFileWritePackets, we will stub the rest
       super fun fact time, this actually gets caled twice per packet,
@@ -56,19 +63,20 @@ public class ADTSPacketizer {
       
       if (ctxt.callCount % 2) != 0 {  // header
         // grab the packet desc
-        guard let desc = ctxt.descs?[ctxt.packetIdx]
+        guard let desc = ctxt.descs?[ ctxt.packetIdx ]
         else {
           print ( "no packet descs, bad!" )
+          ctxt.packetHandler? ( .failure(.packetDescsMissing) )
           return kAudioFileUnspecifiedError
         }
         // usually the header is 7, it can be 9, IDK in what circs, so, careful does it
         ctxt.packet = Data ( capacity: Int ( reqCnt + desc.mDataByteSize ) )
-        ctxt.packet.append(contentsOf: UnsafeRawBufferPointer(start: buff, count: Int(reqCnt)))
+        ctxt.packet.append ( contentsOf: UnsafeRawBufferPointer(start: buff, count: Int(reqCnt)) )
       }
       else {  // packet
-        ctxt.packet.append(contentsOf: UnsafeRawBufferPointer(start: buff, count: Int(reqCnt)))
+        ctxt.packet.append ( contentsOf: UnsafeRawBufferPointer(start: buff, count: Int(reqCnt)) )
         ctxt.packetIdx += 1
-        ctxt.packetHandler?(ctxt.packet)
+        ctxt.packetHandler? ( .success(ctxt.packet) )
       }
       
       actCnt.pointee = reqCnt
@@ -89,7 +97,11 @@ public class ADTSPacketizer {
       [],
       &context.id
     )
-    print("creation status \(status)")
+    
+    if status != noErr {
+      print("creation fail \(status)")
+      return nil
+    }
   }
   
   
@@ -110,7 +122,7 @@ public class ADTSPacketizer {
         avacb.data
     )
     print("write -> \(status): \(iopax) packets")
-    
+    context.packetHandler? ( .failure( .writeFail(status) ) )
   }
   
 }
