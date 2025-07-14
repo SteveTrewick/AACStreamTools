@@ -9,7 +9,7 @@ public class AACFormat {
   public let avformat    : AVAudioFormat
   public let filetype    = kAudioFileAAC_ADTSType
   
-  public init ( sampleRate: Float64, channels: UInt32 ) {
+  public init? ( sampleRate: Float64, channels: UInt32 ) {
   
     var absd = AudioStreamBasicDescription (
       mSampleRate      : sampleRate,
@@ -22,8 +22,11 @@ public class AACFormat {
       mBitsPerChannel  : 0,
       mReserved        : 0
     )
+    
+    guard let format = AVAudioFormat(streamDescription: &absd) else { return nil}
+    
     self.description = absd
-    self.avformat    = AVAudioFormat(streamDescription: &absd)!
-  
+    self.avformat    = format
+    
   }
 }
