@@ -98,7 +98,7 @@ import AACStreamTools
 
 let engine = AVAudioEngine()
 let player = AVAudioPlayerNode()
-let format = AVAudioFormat(standardFormatWithSampleRate: 44100.0, channels: 1)!
+let format = AVAudioFormat(standardFormatWithSampleRate: 48000, channels: 1)!
 
 engine.attach(player)
 engine.connect(player, to: engine.mainMixerNode, format: format)
