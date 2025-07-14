@@ -7,6 +7,12 @@ network or want to fling into one.
 There is basically no custom code in here, it's just a cobbling together of all the bits of API
 that you knew for a fact were already in the system so why can't we use them dammit!
 
+There are also no queues or anything internally becuase I don't know what you kids are using for
+that these days, so you'll have to BYO async paradigm.
+
+FRankly it feels like there is probably an easier way to acheive all this, but this is where I landed. Do, 
+in fact, @me if you feel the urge to demostrate the super simple way I could have done it.
+
 Demo code of a round trip from PCM to compressed packets and back again is below.
 
 ## AACFormat
