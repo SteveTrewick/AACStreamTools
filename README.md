@@ -1,7 +1,7 @@
 # AACStreamTools
 
 AACStreamTools is a smol package of Swift classes for creating and decoding/decompressing 
-AAC compressed data packets, specifically ADTS packets that you eother got over a 
+AAC compressed data packets, specifically ADTS packets that you either got over a 
 network or want to fling into one.
 
 There is basically no custom code in here, it's just a cobbling together of all the bits of API
