@@ -1,7 +1,6 @@
 
 import Foundation
 import AudioToolbox
-import HexDump
 import AVFAudio
 
 
@@ -34,7 +33,6 @@ public class ADTSPacketizer {
   
   public class Context {
     var id            : AudioFileID!
-    let hex           = HexDump()
     var packet        = Data()
     var packetIdx     = 0
     var callCount     = 0

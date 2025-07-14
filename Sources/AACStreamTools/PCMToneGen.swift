@@ -11,6 +11,8 @@ public class PCMToneGen {
     (will go here, for now we just have the sine wave)
   */
   
+  public init() {}
+  
   public func sine (freqHz: Float = 400, durationSec: Float = 5, sampleRate: Float = 44100, amplitude: Float = 1) -> AVAudioPCMBuffer? {
     
     /*
