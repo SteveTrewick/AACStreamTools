@@ -188,7 +188,7 @@ public class AACStreamDecompressor {
     the only other bit of public API, fling data, get back back PCM buffers in the handler
   */
   
-  public func decompress ( data: Data ) {
+  public func decompress ( _ data: Data ) {
     
     data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) in
       guard let baseAddress = buffer.baseAddress else { return }
